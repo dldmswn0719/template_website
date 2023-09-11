@@ -67,6 +67,8 @@ const NavMember = styled.div`
 `
 
 function Nav() {
+
+    const [isValue,setIsValue] = useState("");
     
     const SubMenuHeight = (e)=>{
         const list = document.querySelectorAll(".sub_list")[e];
@@ -74,7 +76,7 @@ function Nav() {
         const value = listLength * 43+"px";
         console.log(value)
 
-        return value;
+        return setIsValue(value);
     }
 
     const [isActive,setIsActive] = useState(-1);
@@ -151,7 +153,7 @@ function Nav() {
                                             setIsActive(-1);
                                         }}
                                         key={i}><NavLink to={e.link}>{e.title}</NavLink>
-                                            <NavSubmenu className={`sub_list ${isActive === i ? 'on' : ''}`}>
+                                            <NavSubmenu className={`sub_list`} style={{height : isActive === i && isValue }}>
                                                 {
                                                     SubMenu[i].map((el,index)=>{
                                                         return(
