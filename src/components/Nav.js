@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
+import Mnav from './Mnav'
 
 
 const NavContent = styled.div`
@@ -46,7 +47,7 @@ const NavSubmenu = styled.ul`
     transition: 0.5s;
     flex-wrap: wrap;
     text-align: center;
-    height: 0; overflow: hidden;
+    height: ${({$isopen, $height}) => ($isopen === "true" ? $height : "0px")}; overflow: hidden;
     li{
         flex-basis: 100% !important;
         padding: 10px 0;
@@ -54,9 +55,9 @@ const NavSubmenu = styled.ul`
             color: #fff;
         }
     }
-    &.on{
+    /* &.on{
         height: auto;
-    }
+    } */
 `
 
 
@@ -64,60 +65,133 @@ const NavMember = styled.div`
     ul{
         display: flex; column-gap: 20px;
     }
+    @media screen and (max-width: 1024px){
+        display: none;
+    }
+    @media screen and (max-width: 768px){
+        display: none;
+    }
 `
 
 function Nav() {
 
-    const [isValue,setIsValue] = useState("");
+    const [isHeight,setIsHeight] = useState();
     
     const SubMenuHeight = (e)=>{
         const list = document.querySelectorAll(".sub_list")[e];
         const listLength = list.querySelectorAll("li").length;
         const value = listLength * 43+"px";
-        console.log(value)
+        // console.log(value)
 
-        return setIsValue(value);
+        return setIsHeight(value); //setIsHeight를 value에 저장
     }
 
     const [isActive,setIsActive] = useState(-1);
+    const SubData = {
+        company : [
+            {
+                title : "인사말",
+                link : "/company/greetings"
+            },
+            {
+                title : "연혁",
+                link : "/company/history"
+            },
+            {
+                title : "내부전경",
+                link : "/company/interior"
+            },
+            {
+                title : "오시는길",
+                link : "/company/directions"
+            }
+        ],
+        business : [
+            {
+                title : "사업소개",
+                link : "/business/business-1"
+            },
+            {
+                title : "사업소개2",
+                link : "/business/business-2"
+            },
+            {
+                title : "사업소개3",
+                link : "/business/business-3"
+            }
+        ],
+        product : [
+            {
+                title : "제품소개",
+                link : "/product/product-1"
+            },
+            {
+                title : "제품소개2",
+                link : "/product/product-2"
+            },
+            {
+                title : "제품소개3",
+                link : "/product/product-3"
+            }
+        ],
+        service : [
+            {
+                title : "공지사항",
+                link : "/service/notice"
+            },
+            {
+                title : "온라인 상담",
+                link : "/service/online"
+            },
+            {
+                title : "질문과 답변",
+                link : "/service/qna"
+            },
+            {
+                title : "갤러리",
+                link : "/service/gallery"
+            }
+        ]
+    }
+    //변수명["company"][0].title 이렇게 사용가능
 
-    const SubMenu = [
-        ["인사말" , "연혁" , "내부전경" , "오시는길"],
-        ["사업소개" , "사업소개2" , "사업소개3"],
-        ["제품소개" , "제품소개2" , "제품소개3"],
-        ["공지사항" , "온라인 상담" , "질문과 답변" , "갤러리"],
-    ]
-    const SubMenuLink = [
-        ["/company/greetings" , "/company/history" , "/company/interior" , "/company/directions"],
-        ["/business/business-1" , "/business/business-2" , "/business/business-3"],
-        ["/product/product-1" , "/product/product-2" , "/product/product-3"],
-        ["/service/notice" ,"/service/online" , "/service/qna" , "/service/gallery"]
-    ]
+    // const SubMenu = [
+    //     ["인사말" , "연혁" , "내부전경" , "오시는길"],
+    //     ["사업소개" , "사업소개2" , "사업소개3"],
+    //     ["제품소개" , "제품소개2" , "제품소개3"],
+    //     ["공지사항" , "온라인 상담" , "질문과 답변" , "갤러리"],
+    // ]
+    // const SubMenuLink = [
+    //     ["/company/greetings" , "/company/history" , "/company/interior" , "/company/directions"],
+    //     ["/business/business-1" , "/business/business-2" , "/business/business-3"],
+    //     ["/product/product-1" , "/product/product-2" , "/product/product-3"],
+    //     ["/service/notice" ,"/service/online" , "/service/qna" , "/service/gallery"]
+    // ]
     // console.log(SubMenu.length)
 
     // let MaxLength = SubMenu.length;
 
-    const Nav = [
-        ["회사소개" , "사업소개" , "제품소개" , "고객센터"],
-        ["/company" , "/business" , "/product" , "/service"]
-    ]
+    // const Nav = [
+    //     ["회사소개" , "사업소개" , "제품소개" , "고객센터"],
+    //     ["/company" , "/business" , "/product" , "/service"]
+    // ]
 
-    const Nav2 = [
+    const Nav = [
         {
             "title" : "회사소개",
-            "link" : "/company"
+            "link" : "company"
         },
         {
             "title" : "사업소개",
-            "link" : "/business"
+            "link" : "business"
         },
         {
             "title" : "제품소개",
-            "link" : "/product"
+            "link" : "product"
         },
         {
             "title" : "고객센터",
-            "link" : "/service" 
+            "link" : "service" 
         }
     ]
 
@@ -144,7 +218,7 @@ function Nav() {
                                 //         <li key={i}><NavLink to={Nav[1][i]}>{e}</NavLink></li>
                                 //     )
                                 // })
-                                Nav2.map((e,i)=>{
+                                Nav.map((e,i)=>{
                                     return (
                                         <li onMouseOver={()=>{
                                             setIsActive(i);
@@ -152,12 +226,13 @@ function Nav() {
                                         }} onMouseOut={()=>{
                                             setIsActive(-1);
                                         }}
-                                        key={i}><NavLink to={e.link}>{e.title}</NavLink>
-                                            <NavSubmenu className={`sub_list`} style={{height : isActive === i && isValue }}>
+                                        key={i}><NavLink to={`/${e.link}`}>{e.title}</NavLink>
+                                            <NavSubmenu className={`sub_list`} $isopen={isActive === i ? "true" : "false"} $height={isHeight}>
+                                            {/* 그냥쓰게되면 속성으로 잡힘 $쓰면 속성으로 안잡힘 (누군가 못보게끔)/속성으로 보이는것을 방지하기위함*/}
                                                 {
-                                                    SubMenu[i].map((el,index)=>{
+                                                    SubData[e.link].map((el,index)=>{
                                                         return(
-                                                            <li key={index}><NavLink to={SubMenuLink[i][index]}>{el}</NavLink></li>
+                                                            <li key={index}><NavLink to={el.link}>{el.title}</NavLink></li>
                                                         )
                                                     })
                                                 }
@@ -184,6 +259,9 @@ function Nav() {
                     </NavMember>
                 </NavWrap>
             </NavContent>
+            {/* 모바일네비 */}
+            <Mnav />
+            {/* 모바일네비 */}
         </>
   )
 }
