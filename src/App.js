@@ -1,15 +1,17 @@
 import {Route, Routes } from "react-router-dom";
-import GlobalStyle from "./components/GlobalStyle";
 import Main from "./pages/Main";
+import Member from "./pages/Member";
+import Login from "./pages/Login";
+import GlobalStyle from "./components/GlobalStyle";
 import Aside from "./components/Aside";
-import { ThemeProvider } from "styled-components";
-import { useState } from "react";
 import Nav from "./components/Nav";
 import store from "./store";
+import { ThemeProvider } from "styled-components";
 import { Provider, useSelector } from "react-redux";
 
-
 function App() {
+
+  console.log(process.env)
 
   return (
     <>
@@ -47,12 +49,14 @@ function Inner(){
 
   return(
     <ThemeProvider theme={DarkMode}>
-      {theme}
+      {/* {theme} */}
       <GlobalStyle />
       <Aside />
       <Nav />
       <Routes>
         <Route path="/" element={<Main />}></Route>
+        <Route path="/member" element={<Member />}></Route>
+        <Route path="/login" element={<Login />}></Route>
       </Routes>
     </ThemeProvider>
   )
