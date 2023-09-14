@@ -1,6 +1,7 @@
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
+import { firebaseAuth, signInWithEmailAndPassword } from '../firebase'
+import {useNavigate} from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -36,6 +37,37 @@ const Input = styled.input`
   border: 1px solid #ddd;
   border-radius: 5px;
   box-sizing: border-box;
+  padding-left: 45px;
+  transition: border-color 0.4s;
+  &:focus{
+    border-color: #ee9191;
+    outline: none;
+  }
+  //클릭했을때 보더 색깔 바뀜, outline 넣으면 색깔만 들어올거임
+  &::placeholder{opacity: 0;}
+  //이메일,비밀번호 안보임
+`
+
+const InputWrapper = styled.div`
+  position: relative;
+  margin-bottom: 20px;
+  input:focus + label,
+  input:not(:placeholder-shown) + label{
+  //안에 내용적으면(없다면 적용x) 글자 다시 내려오지말고 유지
+    top: 4px;
+    left: 4px;
+    font-size: 8px;
+    color:  #ee9191;
+  }
+  // 클릭하면 왼쪽 위로 색깔 생기면서 올라감
+`
+
+const Label = styled.label`
+  position: absolute;
+  top: 10px; left: 10px;
+  font-size: 14px; color: #999;
+  transition: all 0.3s;
+  pointer-events: none;
 `
 
 const Button = styled.button`
@@ -48,14 +80,58 @@ const Button = styled.button`
 `
 
 function Login() {
+
+  const [email,setEmail] = useState();
+  const [password,setPassword] = useState();
+  const [error,setError] = useState();
+  const navigate = useNavigate();
+
+  const errorMsg = (errorCode) =>{
+    const firebaseError = {
+      "auth/user-not-found" : "이메일 혹은 비밀번호가 잘못 되었습니다.",
+      "auth/wrong-password" : "이메일 혹은 비밀번호가 잘못 되었습니다.",
+      "auth/invalid-email" : "이메일 혹은 비밀번호가 잘못 되었습니다."
+    }
+    return firebaseError[errorCode] || "알 수 없는 에러가 발생했습니다"
+    //errorCode 반환
+  }
+
+  const LoginForm = async (e) =>{
+    // async 함수내에서 사용할수있는 것, function 앞에 써야함,무언가 준비한다라는뜻 , 성공과 실패는 try,catch/ 오류가 있을수있지만 try실행해주세요, 만약에 오류가 있다면 catch 실행해주세요
+    e.preventDefault();
+    try{
+      const userLogin = await signInWithEmailAndPassword(firebaseAuth,email,password)
+      // console.log(userLogin)
+      //await는 async안에서만 사용가능
+      const user = userLogin.user
+      console.log(user)
+      //user정보만출력 다른정보는 안나옴
+    }catch(error){
+      setError(errorMsg(error.code));
+      console.log(error.code)
+    }
+  }
+  
+
   return (
     <>
       <Container>
         <SignUp>
           <Title>로그인</Title>
-          <Input type="email" className='email' placeholder='이메일' />
-          <Input type="password" className='password' placeholder='비밀번호' />
-          <Button>로그인</Button>
+          {email} {password}
+          <form onSubmit={LoginForm}>
+            <InputWrapper>
+              <Input type="email" className='email' placeholder='이메일' onChange={(e)=>setEmail(e.target.value)} required/>
+              {/* onchange 넣으면 실시간으로 변함 이메일 위에 적은게 뜬다 */}
+              <Label>이메일</Label>
+            </InputWrapper>
+            <InputWrapper>
+              <Input type="password" className='password' placeholder='비밀번호' onChange={(e)=>setPassword(e.target.value)} required/>
+              <Label>패스워드</Label>
+            </InputWrapper>
+            <Button>로그인</Button>
+          </form>
+          <p>{error}</p>
         </SignUp>
       </Container>
     </>
