@@ -8,6 +8,7 @@ import Nav from "./components/Nav";
 import store from "./store";
 import { ThemeProvider } from "styled-components";
 import { Provider, useSelector } from "react-redux";
+import Example from "./example/Example";
 
 function App() {
 
@@ -54,9 +55,10 @@ function Inner(){
       <Aside />
       <Nav />
       <Routes>
-        <Route path="/" element={<Main />}></Route>
+        <Route path="/main" element={<Main />}></Route>
         <Route path="/member" element={<Member />}></Route>
         <Route path="/login" element={<Login />}></Route>
+        <Route path="/example" element={<Example />}></Route>
       </Routes>
     </ThemeProvider>
   )
