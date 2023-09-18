@@ -202,7 +202,7 @@ function Member() {
       {
         isModal &&
         //isModal이 true일때만 보여주세요 값이 있거나 참일때만 보여줌
-        <Modal error={error} isModal={isModal} setIsModal={setIsModal}/>
+        <Modal error={error} onClose={()=>{setIsModal(false)}} />
       }
       <Container>
         <SignUp>

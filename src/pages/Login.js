@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import { firebaseAuth, signInWithEmailAndPassword } from '../firebase'
 import {useNavigate} from "react-router-dom";
+import { collection, doc, getDoc, getFirestore } from 'firebase/firestore';
+import { useDispatch } from 'react-redux';
+import { logIn, loggedIn } from '../store';
 
 const Container = styled.div`
   display: flex;
@@ -85,6 +88,7 @@ function Login() {
   const [password,setPassword] = useState();
   const [error,setError] = useState();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const errorMsg = (errorCode) =>{
     const firebaseError = {
@@ -106,6 +110,19 @@ function Login() {
       const user = userLogin.user
       console.log(user)
       //user정보만출력 다른정보는 안나옴
+
+      sessionStorage.setItem("users", user.uid)
+      dispatch(logIn(user.uid))
+
+      const userDoc = doc(collection(getFirestore(),"users"),user.uid);
+      const userDocSnapshot = await getDoc(userDoc);
+      if(userDocSnapshot.exists()){
+        const userData = userDocSnapshot.data();
+        dispatch(loggedIn(userData));
+        navigate(-1)
+      }
+      console.log(userDocSnapshot.data())
+
     }catch(error){
       setError(errorMsg(error.code));
       console.log(error.code)

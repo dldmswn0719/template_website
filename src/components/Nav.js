@@ -1,6 +1,7 @@
 import { faArrowRightFromBracket, faLock, faUser, faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useState } from 'react'
+import { useSelector } from 'react-redux'
 import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -153,6 +154,7 @@ const MsubmenuMember = styled(NavMember)`
 
 function Nav() {
 
+    const userState = useSelector(state => state.user)
     const [isHeight,setIsHeight] = useState();
     const [isActive,setIsActive] = useState(-1);
     const [isActive2,setIsActive2] = useState(false);
@@ -327,8 +329,9 @@ function Nav() {
                     <NavMember>
                         <ul>
                             <li>
-                                <NavLink to="/login">
-                                    <FontAwesomeIcon icon={faLock}></FontAwesomeIcon> 로그인
+                                <NavLink to={userState.data?.nickname ? "/logout" : "/login"}>
+                                    <FontAwesomeIcon icon={faLock}></FontAwesomeIcon>{userState.data?.nickname ? "로그아웃" : "로그인"}
+                                    {/* 값이 없더라도 error가 발생하지 않는 코드 data? (이 문법) */}
                                 </NavLink>
                             </li>
                             <li>
