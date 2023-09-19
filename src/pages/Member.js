@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash, faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 import Modal from '../components/Modal'
+import { useDispatch, useSelector } from 'react-redux'
+import { logIn, loggedIn } from '../store'
 
 
 const Container = styled.div`
@@ -95,11 +97,12 @@ function Member() {
   const [password,setPassword] = useState("");
   const [passwordConfirm,setPasswordConfirm] = useState("");
   const [nickname,setNickname] = useState("");
-  const [phone,setPhone] = useState("");
+  const [phoneNumber,setPhoneNumber] = useState("");
   const [error,setError] = useState("");
   const [eye,setEye] = useState([0,0]);
   const [isModal,setIsModal] =useState(false);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const toggleEye = (index) =>{
     const newEye = [...eye];
@@ -116,7 +119,7 @@ function Member() {
     let value = e.target.value;
     e.target.value = e.target.value.replace(/[^0-9]/g, '').replace(/^(\d{0,3})(\d{0,4})(\d{0,4})$/g, "$1-$2-$3").replace(/-{1,2}$/g, "");
 
-    setPhone(value);
+    setPhoneNumber(value);
   }
 
   const errorMsg = (errorCode) =>{
@@ -131,9 +134,9 @@ function Member() {
     return firebaseError[errorCode] || "알 수 없는 에러가 발생하였습니다."
   }
 
-  const isValidPhone = (phone) =>{
+  const isValidPhone = (phoneNumber) =>{
     const regex = /^01[0-9]-[0-9]{3,4}-[0-9]{4}$/;
-    return regex.test(phone)
+    return regex.test(phoneNumber)
     //정규식 코드에 일치하는지 true,false값이 나올거임
   }
 
@@ -151,7 +154,7 @@ function Member() {
       errorMessage = "이름"
     }else if(nickname.length === 0){
       errorMessage = "닉네임";
-    }else if(!isValidPhone(phone)){
+    }else if(!isValidPhone(phoneNumber)){
       setError("유효한 전화번호를 입력해주세요.");
       setIsModal(!isModal);
       //isModal 자체를 true 로 만들어서 실행
@@ -176,16 +179,22 @@ function Member() {
       return;
     }
 
+
     try{
       const { user } = await createUserWithEmailAndPassword(firebaseAuth,email,password);
 
       const userProfile = {
         name,
         nickname,
-        phone
+        phoneNumber,
+        email
+        //이메일 찾기기능 비밀번호 재설정 위해서
       }
 
       await setDoc(doc(getFirestore(),"users",user.uid),userProfile)
+
+      sessionStorage.setItem("users", user.uid)
+      dispatch(logIn(user.uid))
 
       alert("회원가입이 완료 되었습니다.")
       navigate('/');
@@ -197,6 +206,9 @@ function Member() {
     }
   }
 
+  const userState = useSelector(state => state.user)
+  console.log(userState.loggedIn)
+
   return (
     <>
       {
@@ -204,45 +216,48 @@ function Member() {
         //isModal이 true일때만 보여주세요 값이 있거나 참일때만 보여줌
         <Modal error={error} onClose={()=>{setIsModal(false)}} />
       }
-      <Container>
-        <SignUp>
-          <Title>회원가입</Title>
-          {/* {name} {nickname} */}
-          {/* {phone} */}
-          <InputWrapper>
-            <Input value={name} onChange={(e)=>{setName(e.target.value)}} type="text" className='name' placeholder='이름' />
-            <Label>이름</Label>
-          </InputWrapper>
-          <InputWrapper>
-            <Input value={nickname} onChange={(e)=>{setNickname(e.target.value)}} type="text" className='nickname' placeholder='닉네임' />
-            <Label>닉네임</Label>
-          </InputWrapper>
-          <InputWrapper>
-            <Input onInput={PhoneNumber} maxLength={13} type="text" className='phone' placeholder='전화번호' />
-            <Label>전화번호</Label>
-          </InputWrapper>
-          <InputWrapper>
-            <Input onChange={(e)=>{setEmail(e.target.value)}} type="email" className='email' placeholder='이메일' />
-            <Label>이메일</Label>   
-          </InputWrapper>
-          <Password>
+      {
+        userState.loggedIn ? <Modal error="이미 로그인 중입니다." onClose={()=>{navigate('/')}} /> :
+        <Container>
+          <SignUp>
+            <Title>회원가입</Title>
+            {/* {name} {nickname} */}
+            {/* {phone} */}
             <InputWrapper>
-              <Input onChange={(e)=>{setPassword(e.target.value)}} type={eye[0] ? 'text' : 'password'} className='password' placeholder='비밀번호' />
-              <Label>비밀번호</Label>
-              <FontAwesomeIcon icon={eye[0] ? faEye : faEyeSlash} onClick={()=>{toggleEye(0)}}/>
+              <Input value={name} onChange={(e)=>{setName(e.target.value)}} type="text" className='name' placeholder='이름' />
+              <Label>이름</Label>
             </InputWrapper>
-          </Password>
-          <Password>
             <InputWrapper>
-              <Input onChange={(e)=>{setPasswordConfirm(e.target.value)}} type={eye[1] ? 'text' : 'password'} className='confirm_password' placeholder='비밀번호 확인' />
-              <Label>비밀번호 확인</Label>
-              <FontAwesomeIcon icon={eye[1] ? faEye : faEyeSlash} onClick={()=>{toggleEye(1)}} />
+              <Input value={nickname} onChange={(e)=>{setNickname(e.target.value)}} type="text" className='nickname' placeholder='닉네임' />
+              <Label>닉네임</Label>
             </InputWrapper>
-          </Password>
-          <Button onClick={signUp}>가입</Button>
-          {/* <p>{error}</p> */}
-        </SignUp>
-      </Container>
+            <InputWrapper>
+              <Input onInput={PhoneNumber} maxLength={13} type="text" className='phone' placeholder='전화번호' />
+              <Label>전화번호</Label>
+            </InputWrapper>
+            <InputWrapper>
+              <Input onChange={(e)=>{setEmail(e.target.value)}} type="email" className='email' placeholder='이메일' />
+              <Label>이메일</Label>   
+            </InputWrapper>
+            <Password>
+              <InputWrapper>
+                <Input onChange={(e)=>{setPassword(e.target.value)}} type={eye[0] ? 'text' : 'password'} className='password' placeholder='비밀번호' />
+                <Label>비밀번호</Label>
+                <FontAwesomeIcon icon={eye[0] ? faEye : faEyeSlash} onClick={()=>{toggleEye(0)}}/>
+              </InputWrapper>
+            </Password>
+            <Password>
+              <InputWrapper>
+                <Input onChange={(e)=>{setPasswordConfirm(e.target.value)}} type={eye[1] ? 'text' : 'password'} className='confirm_password' placeholder='비밀번호 확인' />
+                <Label>비밀번호 확인</Label>
+                <FontAwesomeIcon icon={eye[1] ? faEye : faEyeSlash} onClick={()=>{toggleEye(1)}} />
+              </InputWrapper>
+            </Password>
+            <Button onClick={signUp}>가입</Button>
+            {/* <p>{error}</p> */}
+          </SignUp>
+        </Container>
+      }
     </>
   )
 }
