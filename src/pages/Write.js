@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import styled from 'styled-components';
 import Ckeditor from '../components/Ckeditor';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import Modal from '../components/Modal'
+import { doc, getDoc, getFirestore } from 'firebase/firestore';
 
 const Container = styled.div`
   width: 100%;
@@ -82,15 +83,37 @@ const ContentLabel = styled.p`
 function Write() {
 
   const [txtTitle,setTxtTitle] = useState("");
-  const {board} = useParams()
+  const {board,view} = useParams()
   // alert(board) write/service 썻다면 알림창 service나올거임
-
   const boards = ["notice" , "online" , "qna" , "gallery"];
-  const [isModal,setIsModal] = useState(true);
+  const [isModal,setIsModal] = useState(view ? false : true);
   const navigate = useNavigate();
   const memberProfile = useSelector(state => state.user);
   // 이게시판은 회원이 로그인하지않으면 이용하지 못하게 만든것
   // console.log(memberProfile)
+
+  const [postData,setPostData] = useState(null);
+  const [message,setMessage] = useState("");
+
+  useEffect(() =>{
+    if(board && view){
+      // 수정 버튼 눌렀다면 데이터랑 에디터의 값을 넣어주기위해서
+      const fetchData = async () =>{
+        const postRef = doc(getFirestore(),board,view);
+        const postSnapShot = await getDoc(postRef);
+        if(postSnapShot.exists()){
+          setIsModal(false)
+          setPostData(postSnapShot.data())
+          setTxtTitle(postSnapShot.data().title)
+        }else{
+          setIsModal(true)
+          setMessage("해당 문서가 존재하지 않습니다.")
+        }
+      }
+      fetchData()
+    }
+
+  },[board,view])
 
   if(!memberProfile.loggedIn){
     return(
@@ -114,23 +137,28 @@ function Write() {
   }
 
   return (
-    <Container>
-      <InnerContainer>
-        <Header>
-          <Heading>글쓰기</Heading>
-        </Header>
-        <ContentWrapper>
-          <ContentInner>
-            <Title>제목</Title>
-            <TextInput type="text" onChange={(e)=>{setTxtTitle(e.target.value)}} />
-          </ContentInner>
-          <ContentInputWrapper>
-            <ContentLabel>내용</ContentLabel>
-            <Ckeditor title={txtTitle} />
-          </ContentInputWrapper>
-        </ContentWrapper>
-      </InnerContainer>
-    </Container>
+    <>
+      {
+        isModal && view && <Modal error={message} onClose={()=>{setIsModal(false); navigate(`/service/${board}`)}} />
+      }
+      <Container>
+        <InnerContainer>
+          <Header>
+            <Heading>{board && view ? "글 수정하기" : "글 쓰기"}</Heading>
+          </Header>
+          <ContentWrapper>
+            <ContentInner>
+              <Title>제목</Title>
+              <TextInput defaultValue={postData && postData.title} type="text" onChange={(e)=>{setTxtTitle(e.target.value)}} />
+            </ContentInner>
+            <ContentInputWrapper>
+              <ContentLabel>내용</ContentLabel>
+              <Ckeditor postData={postData} title={txtTitle} />
+            </ContentInputWrapper>
+          </ContentWrapper>
+        </InnerContainer>
+      </Container>
+    </>
   );
 }
 

@@ -23,6 +23,7 @@ import Online from "./pages/service/Online";
 import View from "./pages/View";
 import { useState } from "react";
 import Modal from "./components/Modal";
+import Notpage from "./pages/Notpage";
 
 
 function App() {
@@ -67,14 +68,20 @@ function Inner(){
 
   const dispatch = useDispatch();
   const uid = sessionStorage.getItem("users");
-  if(uid){
-    dispatch(logIn(uid));
-  }
-  // console.log(uid)
+
+  // useEffect(()=>{
+    // if(uid){
+    //   dispatch(logIn(uid));
+    // }
+  //   // console.log(uid)
+  // },[])
   //콘솔창에 내 uid값 나온다
 
   useEffect(()=>{
-
+    if(uid){
+      dispatch(logIn(uid));
+    }
+    
     const fetchUser = async () =>{
       if(!uid) return;
       //만약에 uid값이 없다면 return 시킬거임
@@ -120,13 +127,16 @@ function Inner(){
         <Route path="/findemail" element={<Findemail />}></Route>
         <Route path="/write/:board" element={<Write />}></Route>
         <Route path="/view/:board/:view" element={<View />}></Route>
-        <Route path="/view/:board" element={isModal && <Modal error="유효하지 않은 경로입니다." onClose={()=>{navigate("/")}} />}></Route>
+        {/* <Route path="/view/:board" element={isModal && <Modal error="유효하지 않은 경로입니다." onClose={()=>{navigate("/")}} />}></Route> */}
+        <Route path="/edit/:board/:view" element={<Write />}></Route>
         <Route path="/service" element={<Service />}>
           <Route path="notice" element={<Notice />}></Route>
           <Route path="online" element={<Online />}></Route>
           <Route path="qna" element={<Qna />}></Route>
           <Route path="gallery" element={<Gallery />}></Route>
-        </Route> 
+        </Route>
+        <Route path="/*" element={<Notpage />}></Route>
+        {/* /* 뜻은 작성한 페이지 말고 모든 페이지 /404는 페이지가 없다/ 403은 폴더가 없다 / 500 서버가 잠김(서버 에러) */}
       </Routes>
     </ThemeProvider>
   )

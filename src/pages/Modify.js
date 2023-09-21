@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 function Modify() {
 
   const userState = useSelector(state => state.user)
-  console.log(userState.loggedIn)
+  // console.log(userState.loggedIn)
   const navigate = useNavigate();
 
   return (
