@@ -123,7 +123,7 @@ function Inner(){
         <Route path="/login" element={<Login />}></Route>
         <Route path="/example" element={<Example />}></Route>
         <Route path="/logout" element={<Logout />}></Route>
-        <Route path="/modify" element={<Modify />}></Route>
+        <Route path="/modify" element={<Member />}></Route>
         <Route path="/findemail" element={<Findemail />}></Route>
         <Route path="/write/:board" element={<Write />}></Route>
         <Route path="/view/:board/:view" element={<View />}></Route>
