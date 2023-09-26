@@ -78,6 +78,18 @@ function Notice() {
     fetchPosts()
 
   },[])
+
+  const [likes,setLikes] = useState(Array(posts.length).fill(1));
+
+  const toggleLike = (index) =>{
+    //1.원래 값을 복사
+    //2.복사한 배열의 원하는 인덱스 번호의 값을 변경
+    //3.그값을 원래 값에 붙혀넣기
+    const newLikes = [...likes]; //1번 likes데이터 newLikes에 복사되었다
+    newLikes[index] = !newLikes[index]
+    setLikes(newLikes);
+    //어떠한 배열을 여러개 돌려서 각각 state값 넣을때 이 방법 쓰기
+  }
   
   if(posts.length === 0){
     return <div>로딩중</div>
@@ -94,6 +106,7 @@ function Notice() {
             <ListItem>작성자</ListItem>
             <ListItem>작성일</ListItem>
             <ListItem>조회수</ListItem>
+            <ListItem>좋아요</ListItem>
           </List>
           {
             posts.map((e,i)=>{
@@ -106,6 +119,7 @@ function Notice() {
                   <ListItem>{e.nickname}</ListItem>
                   <ListItem>{e.timestamp.toDate().toLocaleDateString()}</ListItem>
                   <ListItem>{e.view}</ListItem>
+                  <ListItem onClick={()=>{toggleLike(i)}}>{likes[i] ? '💗' : '🤍' }</ListItem>
                 </List>
               )
             })

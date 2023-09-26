@@ -27,7 +27,7 @@ function Aside() {
 
     return (
     <ASide $isdark={theme} onClick={()=>{dispatch(toggleTheme())}}>
-        <FontAwesomeIcon $isdark={theme} icon = {theme === 'light' ? faSun : faMoon} size="lg" />
+        <FontAwesomeIcon $isdark={theme} icon = {theme === 'light' ? faMoon : faSun} size="lg" />
     </ASide>
   )
 }
