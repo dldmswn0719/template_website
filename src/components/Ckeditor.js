@@ -9,6 +9,7 @@ import { faList, faPen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Modal from './Modal';
 import { useEffect } from 'react';
+import { getStorage,ref,uploadBytesResumable,getDownloadURL} from 'firebase/storage'
 
 const ButtonWrap = styled.div`
     display: flex;
@@ -44,6 +45,8 @@ function Ckeditor({title,postData}) {
     const [message,setMessage] = useState("");
     const {board,view} = useParams();
     // alert(board) notice에 들어왔다면 notice로 알림창 뜬다
+    const [editorInstance,setEditorInstance] = useState(null);
+    const [fileUrl,setFileUrl] = useState("");
 
     useEffect(()=>{
         if(postData){
@@ -74,27 +77,68 @@ function Ckeditor({title,postData}) {
                 alert("게시글이 성공적으로 수정 되었습니다.")
                 
             }else{
-                await addDoc(collection(getFirestore(),board),{
-                    //set 은 이름을 지정할수있다
-                    //add 는 자동으로 랜덤값이 올라간다.
-                    title : title,
-                    content : writeData,
-                    view : 1,
-                    uid : memberProfile.uid,
-                    name : memberProfile.data.name,
-                    email : memberProfile.data.email,
-                    nickname : memberProfile.data.nickname,
-                    timestamp : serverTimestamp()
-                })
-                alert("게시글이 성공적으로 등록 되었습니다.")
+                const fileInput = document.querySelector('#file').files[0]
+                console.log(fileInput)
+                if(fileInput){
+                    uploadToFirebase(fileInput)
+                }
+                // await addDoc(collection(getFirestore(),board),{
+                //     //set 은 이름을 지정할수있다
+                //     //add 는 자동으로 랜덤값이 올라간다.
+                //     title : title,
+                //     content : writeData,
+                //     view : 1,
+                //     uid : memberProfile.uid,
+                //     name : memberProfile.data.name,
+                //     email : memberProfile.data.email,
+                //     nickname : memberProfile.data.nickname,
+                //      file : fileUrl,
+                //     timestamp : serverTimestamp()
+                // })
+                // alert("게시글이 성공적으로 등록 되었습니다.")
             }
-            navigate(`/service/${board}`)
+            // navigate(`/service/${board}`)
 
         }catch(error){
             setIsModal(!isModal);
             setMessage(error)
         }
     }
+
+    const uploadToFirebase = async (file) =>{
+        const storageRef = ref(getStorage(),'images/' + file.name);
+        const upload = uploadBytesResumable(storageRef,file);
+
+        return new Promise((resolve,reject)=>{
+            upload.on('state_changed',
+            (snapshot) =>{
+
+            },
+
+            (error)=>{
+                reject(error)
+            },
+            ()=>{
+                getDownloadURL(upload.snapshot.ref).then((result)=>{
+                    resolve(result)
+                    console.log(result)
+                    setFileUrl(result)
+                })
+            })
+        })
+    }
+
+    function UploadAdapter(editor){
+        editor.plugins.get("FileRepository").createUploadAdapter = (loader) =>{
+            return{
+                upload:async () =>{
+                    const file = await loader.file;
+                    const downURL = await uploadToFirebase(file);
+                    return {default : downURL} 
+                }
+            }
+        }
+    } 
 
     return (
         <>
@@ -106,8 +150,10 @@ function Ckeditor({title,postData}) {
                 data={writeData}
                 config={{
                         placeholder: "내용을 입력하세요.",
+                        extraPlugins : [UploadAdapter]
                     }}
                 onReady={ editor => {
+                    setEditorInstance(editor)
                     // You can store the "editor" and use when it is needed.
                     // console.log( 'Editor is ready to use!', editor );
                 } }
@@ -123,6 +169,7 @@ function Ckeditor({title,postData}) {
                     // console.log( 'Focus.', editor );
                 } }
             />
+            <input type="file" id="file" />
             <ButtonWrap>
                 <Button><Link to='/service/notice'><FontAwesomeIcon icon={faList} />목록</Link></Button>
                 <Button onClick={dataSubmit}><FontAwesomeIcon icon={faPen} />완료</Button>
