@@ -189,7 +189,8 @@ function Login() {
       console.log(user)
       sessionStorage.setItem("users",user.uid)
       dispatch(logIn(user.uid))
-      navigate("/member" ,{
+      // nickname 필요없다면 / 로 보내주기 , 필요하다면 /member로 보내기
+      navigate("/" ,{
         state:
         {
           nickname : user.displayName,

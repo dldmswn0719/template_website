@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { memo } from 'react'
 
-function Product() {
+const Product = memo(function(){
+
+  console.log("Product 실행")
+
   return (
     <div>Product</div>
   )
-}
+})
 
 export default Product
