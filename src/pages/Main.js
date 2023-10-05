@@ -1,5 +1,6 @@
 import React from 'react'
 import Banner from '../components/Home/Banner'
+import Company from '../components/Home/Company'
  
 // import React, { useEffect, useState } from 'react'
 // import Product from './Product'
@@ -42,6 +43,7 @@ function Main() {
   return (
     <>
       <Banner />
+      <Company />
       {/* {result}
       <p>{count}</p>
       <Product />
